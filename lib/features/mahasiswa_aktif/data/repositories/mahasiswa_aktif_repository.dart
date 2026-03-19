@@ -1,35 +1,56 @@
+///dio
+import 'package:dio/dio.dart';
 import 'package:cobadulu/features/mahasiswa_aktif/data/models/mahasiswa_aktif_model.dart';
 
 class MahasiswaAktifRepository {
-  /// Kembalikan List<MahasiswaAktifModel>
-  Future<List<MahasiswaAktifModel>> getMahasiswaAktif() async {
-    await Future.delayed(const Duration(milliseconds: 700)); // simulasi
+  final Dio _dio = Dio(
+    BaseOptions(
+      baseUrl: 'https://jsonplaceholder.typicode.com',
+      headers: {'Accept': 'application/json'},
+    ),
+  );
 
-    return [
-      MahasiswaAktifModel(
-        nama: 'Siti Nurhaliza',
-        nim: '2001001',
-        email: 'siti.n@example.com',
-        jurusan: 'Teknik Informatika',
-        angkatan: '2020',
-        isActive: true,
-      ),
-      MahasiswaAktifModel(
-        nama: 'Budi Santoso',
-        nim: '2001002',
-        email: 'budi.s@example.com',
-        jurusan: 'Teknik Informatika',
-        angkatan: '2021',
-        isActive: true,
-      ),
-      MahasiswaAktifModel(
-        nama: 'Doni Prasetyo',
-        nim: '2001004',
-        email: 'doni.p@example.com',
-        jurusan: 'Teknik Komputer',
-        angkatan: '2022',
-        isActive: true,
-      ),
-    ];
+  /// Mendapatkan daftar mahasiswa aktif / posts
+  Future<List<MahasiswaAktifModel>> getMahasiswaAktifList() async {
+    try {
+      final response = await _dio.get('/posts');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        print(data); // Debug
+        return data
+            .map((json) => MahasiswaAktifModel.fromJson(json))
+            .toList();
+      } else {
+        throw Exception(
+            'Gagal memuat data mahasiswa aktif: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      print('Dio error: ${e.message}');
+      throw Exception('Gagal memuat data mahasiswa aktif: ${e.message}');
+    }
   }
 }
+/////////http
+//import 'dart:convert';
+//import 'package:cobadulu/features/mahasiswa_aktif/data/models/mahasiswa_aktif_model.dart';
+//import 'package:http/http.dart' as http;
+
+//class MahasiswaAktifRepository {
+  //// Mendapatkan daftar mahasiswa aktif / posts
+  //Future<List<MahasiswaAktifModel>> getMahasiswaAktifList() async {
+    ///final response = await http.get(
+      //Uri.parse('https://jsonplaceholder.typicode.com/posts'),
+      //headers: {'Accept': 'application/json'},
+    //);
+
+    //if (response.statusCode == 200) {
+      //final List<dynamic> data = jsonDecode(response.body);
+      //print(data); // Debug: Tampilkan data yang sudah di-decode
+      //return data.map((json) => MahasiswaAktifModel.fromJson(json)).toList();
+    //} else {
+      //print('Error: ${response.statusCode} - ${response.body}');
+      //throw Exception('Gagal memuat data mahasiswa aktif: ${response.statusCode}');
+    //}
+  //}
+//}

@@ -75,7 +75,7 @@ class _MahasiswaAktifPageState extends ConsumerState<MahasiswaAktifPage> {
                 ),
                 Expanded(
                   child: MahasiswaAktifListView(
-                    list: list,
+                    mahasiswaAktifList: list,
                     onRefresh: () => ref.read(mahasiswaAktifNotifierProvider.notifier).refresh(),
                   ),
                 ),

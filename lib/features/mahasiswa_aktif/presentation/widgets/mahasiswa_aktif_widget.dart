@@ -1,35 +1,40 @@
-// lib/features/mahasiswa_aktif/presentation/widgets/mahasiswa_aktif_widget.dart
 import 'package:flutter/material.dart';
 import 'package:cobadulu/core/constants/app_constants.dart';
 import 'package:cobadulu/features/mahasiswa_aktif/data/models/mahasiswa_aktif_model.dart';
 
-/// Kartu modern untuk MahasiswaAktifModel (dengan badge AKTIF)
 class ModernMahasiswaAktifCard extends StatefulWidget {
-  final MahasiswaAktifModel mahasiswa;
+  final MahasiswaAktifModel mahasiswaAktif;
   final VoidCallback? onTap;
   final List<Color>? gradientColors;
 
   const ModernMahasiswaAktifCard({
     Key? key,
-    required this.mahasiswa,
+    required this.mahasiswaAktif,
     this.onTap,
     this.gradientColors,
   }) : super(key: key);
 
   @override
-  State<ModernMahasiswaAktifCard> createState() => _ModernMahasiswaAktifCardState();
+  State<ModernMahasiswaAktifCard> createState() =>
+      _ModernMahasiswaAktifCardState();
 }
 
 class _ModernMahasiswaAktifCardState extends State<ModernMahasiswaAktifCard>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _scaleAnimation;
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(duration: const Duration(milliseconds: 150), vsync: this);
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.97).animate(
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 150),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.97,
+    ).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
   }
@@ -40,10 +45,131 @@ class _ModernMahasiswaAktifCardState extends State<ModernMahasiswaAktifCard>
     super.dispose();
   }
 
-  String get _initial {
-    final name = widget.mahasiswa.nama;
-    if (name.trim().isEmpty) return '?';
-    return name.trim().substring(0, 1).toUpperCase();
+  @override
+  Widget build(BuildContext context) {
+    final gradientColors = widget.gradientColors ??
+        [
+          Theme.of(context).primaryColor,
+          Theme.of(context).primaryColor.withOpacity(0.7),
+        ];
+
+    return GestureDetector(
+      onTapDown: (_) => _controller.forward(),
+      onTapUp: (_) {
+        _controller.reverse();
+        widget.onTap?.call();
+      },
+      onTapCancel: () => _controller.reverse(),
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Colors.white, gradientColors[0].withOpacity(0.05)],
+            ),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: gradientColors[0].withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+            border: Border.all(
+              color: gradientColors[0].withOpacity(0.1),
+              width: 1,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: gradientColors,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: gradientColors[0].withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Text(
+                      widget.mahasiswaAktif.title.isNotEmpty
+                          ? widget.mahasiswaAktif.title[0].toUpperCase()
+                          : '?',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.mahasiswaAktif.title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: -0.3,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 8),
+                      _buildInfoRow(
+                        Icons.person_outline,
+                        'User ID: ${widget.mahasiswaAktif.userId}',
+                      ),
+                      const SizedBox(height: 4),
+                      _buildInfoRow(
+                        Icons.tag_outlined,
+                        'Post ID: ${widget.mahasiswaAktif.id}',
+                      ),
+                      const SizedBox(height: 4),
+                      _buildInfoRow(
+                        Icons.description_outlined,
+                        widget.mahasiswaAktif.body,
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: gradientColors[0].withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 16,
+                    color: gradientColors[0],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildInfoRow(IconData icon, String text) {
@@ -62,98 +188,87 @@ class _ModernMahasiswaAktifCardState extends State<ModernMahasiswaAktifCard>
       ],
     );
   }
+}
+
+class MahasiswaAktifCard extends StatelessWidget {
+  final MahasiswaAktifModel mahasiswaAktif;
+  final VoidCallback? onTap;
+
+  const MahasiswaAktifCard({
+    Key? key,
+    required this.mahasiswaAktif,
+    this.onTap,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final List<Color> gradientColors = widget.gradientColors ??
-        [theme.primaryColor, theme.primaryColor.withOpacity(0.7)];
-    final primaryGradient = gradientColors.isNotEmpty ? gradientColors[0] : theme.primaryColor;
-
-    return Semantics(
-      button: true,
-      label: 'Kartu mahasiswa aktif ${widget.mahasiswa.nama}',
-      child: GestureDetector(
-        onTapDown: (_) => _controller.forward(),
-        onTapUp: (_) {
-          _controller.reverse();
-          widget.onTap?.call();
-        },
-        onTapCancel: () => _controller.reverse(),
-        child: ScaleTransition(
-          scale: _scaleAnimation,
-          child: Stack(
+    return Card(
+      margin: const EdgeInsets.only(bottom: AppConstants.paddingMedium),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Colors.white, primaryGradient.withOpacity(0.04)],
+              CircleAvatar(
+                radius: 30,
+                backgroundColor: Theme.of(context).primaryColor,
+                child: Text(
+                  mahasiswaAktif.title.isNotEmpty
+                      ? mahasiswaAktif.title[0].toUpperCase()
+                      : '?',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
                   ),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(color: primaryGradient.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 4)),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      mahasiswaAktif.title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      'User ID: ${mahasiswaAktif.userId}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    Text(
+                      'Post ID: ${mahasiswaAktif.id}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    Text(
+                      mahasiswaAktif.body,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[600],
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ],
-                  border: Border.all(color: primaryGradient.withOpacity(0.06), width: 1),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 56,
-                        height: 56,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: gradientColors),
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [BoxShadow(color: primaryGradient.withOpacity(0.2), blurRadius: 6, offset: const Offset(0, 3))],
-                        ),
-                        child: Center(
-                          child: Text(_initial, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.mahasiswa.nama,
-                              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: -0.3),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 8),
-                            if (widget.mahasiswa.nim.isNotEmpty) _buildInfoRow(Icons.badge_outlined, 'NIM: ${widget.mahasiswa.nim}'),
-                            const SizedBox(height: 4),
-                            if (widget.mahasiswa.jurusan.isNotEmpty) _buildInfoRow(Icons.school_outlined, widget.mahasiswa.jurusan),
-                            const SizedBox(height: 4),
-                            if ((widget.mahasiswa.angkatan ?? '').isNotEmpty) _buildInfoRow(Icons.calendar_today_outlined, 'Angkatan: ${widget.mahasiswa.angkatan}'),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(color: primaryGradient.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                        child: Icon(Icons.arrow_forward_ios_rounded, size: 16, color: primaryGradient),
-                      ),
-                    ],
-                  ),
                 ),
               ),
-
-              // badge AKTIF
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(color: Colors.green[700], borderRadius: BorderRadius.circular(12)),
-                  child: const Text('AKTIF', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
-                ),
-              ),
+              Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
             ],
           ),
         ),
@@ -162,44 +277,109 @@ class _ModernMahasiswaAktifCardState extends State<ModernMahasiswaAktifCard>
   }
 }
 
-/// ListView khusus untuk MahasiswaAktifModel
-class MahasiswaAktifListView extends StatelessWidget {
-  final List<MahasiswaAktifModel> list;
+class MahasiswaAktifEmptyState extends StatelessWidget {
   final VoidCallback? onRefresh;
 
-  const MahasiswaAktifListView({Key? key, required this.list, this.onRefresh}) : super(key: key);
+  const MahasiswaAktifEmptyState({Key? key, this.onRefresh}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: () async {
-        if (onRefresh != null) {
-          onRefresh!();
-          await Future<void>.delayed(const Duration(milliseconds: 200));
-        }
-      },
-      child: list.isEmpty
-          ? ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.5,
-            child: Center(child: Text('Tidak ada mahasiswa aktif', style: Theme.of(context).textTheme.bodyMedium)),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.article_outlined,
+              size: 64,
+              color: Colors.grey[400],
+            ),
           ),
+          const SizedBox(height: 24),
+          Text(
+            'Tidak ada data mahasiswa aktif',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[700],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Belum ada data dari API',
+            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+          ),
+          if (onRefresh != null) ...[
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: onRefresh,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Refresh'),
+            ),
+          ],
         ],
-      )
-          : ListView.builder(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        itemCount: list.length,
+      ),
+    );
+  }
+}
+
+class MahasiswaAktifListView extends StatelessWidget {
+  final List<MahasiswaAktifModel> mahasiswaAktifList;
+  final VoidCallback onRefresh;
+  final bool useModernCard;
+
+  const MahasiswaAktifListView({
+    Key? key,
+    required this.mahasiswaAktifList,
+    required this.onRefresh,
+    this.useModernCard = true,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    if (mahasiswaAktifList.isEmpty) {
+      return MahasiswaAktifEmptyState(onRefresh: onRefresh);
+    }
+
+    return RefreshIndicator(
+      onRefresh: () async => onRefresh(),
+      child: ListView.builder(
+        padding: const EdgeInsets.all(AppConstants.paddingMedium),
+        itemCount: mahasiswaAktifList.length,
         itemBuilder: (context, index) {
-          final m = list[index];
-          final gradient = AppConstants.dashboardGradients[index % AppConstants.dashboardGradients.length];
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: ModernMahasiswaAktifCard(mahasiswa: m, gradientColors: gradient, onTap: () {
-              // default: open detail jika mau
-            }),
-          );
+          final mahasiswaAktif = mahasiswaAktifList[index];
+          final gradientColors = AppConstants.dashboardGradients[
+          index % AppConstants.dashboardGradients.length];
+
+          if (useModernCard) {
+            return ModernMahasiswaAktifCard(
+              mahasiswaAktif: mahasiswaAktif,
+              gradientColors: gradientColors,
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Detail: ${mahasiswaAktif.title}'),
+                    behavior: SnackBarBehavior.floating,
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              },
+            );
+          } else {
+            return MahasiswaAktifCard(
+              mahasiswaAktif: mahasiswaAktif,
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Detail: ${mahasiswaAktif.title}')),
+                );
+              },
+            );
+          }
         },
       ),
     );

@@ -2,7 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cobadulu/features/mahasiswa_aktif/data/models/mahasiswa_aktif_model.dart';
 import 'package:cobadulu/features/mahasiswa_aktif/data/repositories/mahasiswa_aktif_repository.dart';
 
-final mahasiswaAktifRepositoryProvider = Provider<MahasiswaAktifRepository>((ref) {
+final mahasiswaAktifRepositoryProvider =
+Provider<MahasiswaAktifRepository>((ref) {
   return MahasiswaAktifRepository();
 });
 
@@ -33,22 +34,26 @@ class MahasiswaAktifState {
   }
 }
 
-class MahasiswaAktifNotifier extends StateNotifier<AsyncValue<MahasiswaAktifState>> {
+class MahasiswaAktifNotifier
+    extends StateNotifier<AsyncValue<MahasiswaAktifState>> {
   final MahasiswaAktifRepository _repo;
 
-  MahasiswaAktifNotifier(this._repo) : super(const AsyncValue.loading()) {
+  MahasiswaAktifNotifier(this._repo)
+      : super(const AsyncValue.loading()) {
     loadAktif();
   }
 
   Future<void> loadAktif() async {
     state = const AsyncValue.loading();
     try {
-      final list = await _repo.getMahasiswaAktif(); // <- List<MahasiswaAktifModel>
-      state = AsyncValue.data(MahasiswaAktifState(
-        sourceList: List<MahasiswaAktifModel>.from(list),
-        filteredList: List<MahasiswaAktifModel>.from(list),
-        query: '',
-      ));
+      final list = await _repo.getMahasiswaAktifList(); // ✅ FIXED
+      state = AsyncValue.data(
+        MahasiswaAktifState(
+          sourceList: List<MahasiswaAktifModel>.from(list),
+          filteredList: List<MahasiswaAktifModel>.from(list),
+          query: '',
+        ),
+      );
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -59,27 +64,37 @@ class MahasiswaAktifNotifier extends StateNotifier<AsyncValue<MahasiswaAktifStat
   void setSearchQuery(String q) {
     final cur = state.value;
     if (cur == null) return;
+
     final trimmed = q.trim();
     final lower = trimmed.toLowerCase();
 
     final filtered = cur.sourceList.where((m) {
-      final name = m.nama.toLowerCase();
-      final nim = m.nim.toLowerCase();
-      return name.contains(lower) || nim.contains(lower);
+      final title = m.title.toLowerCase(); // ✅ FIXED
+      final body = m.body.toLowerCase();   // ✅ FIXED
+      return title.contains(lower) || body.contains(lower);
     }).toList();
 
-    state = AsyncValue.data(cur.copyWith(query: trimmed, filteredList: filtered));
+    state = AsyncValue.data(
+      cur.copyWith(query: trimmed, filteredList: filtered),
+    );
   }
 
   void clearSearch() {
     final cur = state.value;
     if (cur == null) return;
-    state = AsyncValue.data(cur.copyWith(query: '', filteredList: List.from(cur.sourceList)));
+
+    state = AsyncValue.data(
+      cur.copyWith(
+        query: '',
+        filteredList: List.from(cur.sourceList),
+      ),
+    );
   }
 }
 
 final mahasiswaAktifNotifierProvider = StateNotifierProvider.autoDispose<
-    MahasiswaAktifNotifier, AsyncValue<MahasiswaAktifState>>((ref) {
+    MahasiswaAktifNotifier,
+    AsyncValue<MahasiswaAktifState>>((ref) {
   final repo = ref.watch(mahasiswaAktifRepositoryProvider);
   return MahasiswaAktifNotifier(repo);
 });
