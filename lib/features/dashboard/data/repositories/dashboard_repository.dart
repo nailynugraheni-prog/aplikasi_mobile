@@ -12,7 +12,7 @@ class DashboardRepository {
       lastUpdate: DateTime.now(),
       stats: [
         DashboardStats(
-          title: 'Total Mahasiswa',
+          title: 'Mahasiswa',
           value: '1,200',
           subtitle: '',
           // percentage: 8.5,

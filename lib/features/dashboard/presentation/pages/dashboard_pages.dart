@@ -14,7 +14,7 @@ class DashboardPage extends ConsumerWidget {
   // helper: pilih icon berdasarkan title stat
   IconData _getIconForStat(String title) {
     switch (title) {
-      case 'Total Mahasiswa':
+      case 'Mahasiswa':
         return Icons.school_rounded;
       case 'Mahasiswa Aktif':
         return Icons.person_outline_rounded;
@@ -202,7 +202,7 @@ class DashboardPage extends ConsumerWidget {
                                   case 'Dosen':
                                     targetPage = const DosenPage();
                                     break;
-                                  case 'Total Mahasiswa':
+                                  case 'Mahasiswa':
                                     targetPage = const MahasiswaPage();
                                     break;
                                   case 'Mahasiswa Aktif':
